@@ -1,16 +1,22 @@
 from pathlib import Path
 import subprocess
 
+from scripts.utils import ensure_symlink
+
 DOTFILES = Path.home() / "dotfiles"
 SRC = DOTFILES / "fonts"
 DEST = Path.home() / ".local/share/fonts"
 
-def run():
-    DEST.parent.mkdir(parents=True, exist_ok=True)
+def run(dry_run=False):
+    ensure_symlink(
+        src=SRC,
+        dest=DEST,
+        dry_run=dry_run
+    )
 
-    if DEST.exists() or DEST.is_symlink():
-        DEST.unlink()
-    DEST.symlink_to(SRC)
+    if dry_run:
+        print(f"[dry-run] fc-cache -rv")
+        return
 
     subprocess.run(["fc-cache", "-rv"], check=True)
 
